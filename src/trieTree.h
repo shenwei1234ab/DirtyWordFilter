@@ -13,10 +13,6 @@ public:
 	virtual void Init()
 	{
 		//test
-		char str[] = { 'h', 'e' };
-		char str1[] = "she";
-		std::cout << sizeof(str) << std::endl;
-		std::cout << sizeof(str1) << std::endl;
 		Add("he", 2);
 		Add("she", 3);
 		Add("his", 3);

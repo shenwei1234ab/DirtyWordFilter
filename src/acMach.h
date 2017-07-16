@@ -9,7 +9,7 @@
 using namespace std;
 //http://blog.csdn.net/joylnwang/article/details/6793192
 // http://www.hankcs.com/program/algorithm/implementation-and-analysis-of-aho-corasick-algorithm-in-java.html
-
+//https://tech.meituan.com/ac.html
 
 #define ACSM_FAIL_STATE -1
 struct ACSM_PATTERN
@@ -138,7 +138,7 @@ public:
 	{
 		bool ret = false;
 		int state = 0;
-		for (; size && *p; --size, ++p) {
+		for (; size>=0 && *p; --size, ++p) {
 			char c = *p;
 			auto it = acsmStateTable[state].NextState.find(c);
 			if (it != acsmStateTable[state].NextState.end()){

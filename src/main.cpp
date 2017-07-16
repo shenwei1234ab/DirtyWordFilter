@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <vector>
 #include "DirtyManager.h"
-
+#include <map>
 #include "acMach.h"
 
 void DirtyTest()
@@ -28,8 +28,10 @@ void DirtyTest()
 	{
 		std::cout << "not found" << std::endl;
 	}
-
 }
+
+
+
 void main()
 {
 	DirtyTest();
