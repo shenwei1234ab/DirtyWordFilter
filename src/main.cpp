@@ -17,7 +17,7 @@ void DirtyTest()
 	{
 		std::cout << "not found" << std::endl;
 	}*/
-
+	//test
 	DiryManger<AcMachine>::GetInstance().Init();
 	std::string str = "";
 	if (DiryManger<AcMachine>::GetInstance().Check("shers"))
