@@ -12,7 +12,7 @@ using namespace std;
 //https://tech.meituan.com/ac.html
 
 #define ACSM_FAIL_STATE -1
-struct ACSM_PATTERN
+struct acsm_pattern
 {
 	string patrn;			//大写
 	string casepatrn;		//xiao写
@@ -22,7 +22,7 @@ struct ACSM_PATTERN
 	//int      nmatch;
 };
 
-struct ACSM_STATETABLE
+struct acsm_statetable
 {
 	/* Next state - based on input character */
 	//int      NextState[ALPHABET_SIZE];
@@ -32,8 +32,8 @@ struct ACSM_STATETABLE
 	int      FailState ;
 
 	/* List of patterns that end here, if any */
-	//ACSM_PATTERN *MatchList;
-	std::list<ACSM_PATTERN> MatchList;
+	//acsm_pattern *MatchList;
+	std::list<acsm_pattern> MatchList;
 };
 
 
@@ -52,7 +52,7 @@ public:
 
 	virtual void Add(const char *pArray, size_t size)
 	{
-		ACSM_PATTERN newPattern=ACSM_PATTERN();
+		acsm_pattern newPattern = acsm_pattern();
 		newPattern.patrn = pArray;
 		newPattern.casepatrn = pArray;
 		newPattern.n = size;
@@ -63,7 +63,7 @@ public:
 
 
 	//创建goto表和out表
-	void _AddPatternStates(ACSM_PATTERN  p)
+	void _AddPatternStates(acsm_pattern  p)
 	{
 		int state = 0, next, n;
 		int index = 0;
@@ -81,7 +81,7 @@ public:
 			//插入新的节点
 			acsmNumStates++;
 			acsmStateTable[state].NextState[str] = acsmNumStates;
-			acsmStateTable[acsmNumStates] = ACSM_STATETABLE();
+			acsmStateTable[acsmNumStates] = acsm_statetable();
 			state = acsmNumStates;
 		}
 		//构建初步的out表
@@ -169,7 +169,7 @@ public:
 		for (auto iter = acsmPatterns.begin(); iter != acsmPatterns.end(); ++iter){
 			acsmMaxStates += iter->n;
 		}
-		acsmStateTable[0] = ACSM_STATETABLE();
+		acsmStateTable[0] = acsm_statetable();
 		/*for (int i = 0; i < acsmMaxStates; ++i)
 		{
 			ACSM_STATETABLE state;
@@ -187,8 +187,8 @@ public:
 private:
 	int acsmMaxStates;
 	int acsmNumStates;		//节点总的个数
-	list<ACSM_PATTERN> acsmPatterns;
-	unordered_map<int,ACSM_STATETABLE> acsmStateTable;		//hash key:state  value
+	list<acsm_pattern> acsmPatterns;
+	unordered_map<int, acsm_statetable> acsmStateTable;		//hash key:state  value
 };
 
 
