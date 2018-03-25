@@ -303,6 +303,8 @@ static void Build_NFA(ACSM_STRUCT * acsm)
 			}
 			else
 			{
+				//acsm->acsmStateTable[5].NextState[r] = acsm->acsmStateTable[2].NextState[r] =8
+				//通过失效值获得下一个可以跳跃的状态
 				acsm->acsmStateTable[r].NextState[i] =
 					acsm->acsmStateTable[acsm->acsmStateTable[r].FailState].NextState[i];
 			}
@@ -569,3 +571,68 @@ void PrintSummary(ACSM_PATTERN * pattern)
 			printf("%12s : %5d\n", mlist->casepatrn, mlist->nmatch);
 	}
 }
+
+
+
+/*NFA搜索过程*/
+void acSearch(ACSM_STRUCT *acsm, unsigned char *Tx, int n)
+{
+	int nfound = 0;
+	int state;
+	int next;
+	ACSM_PATTERN * mlist;
+	unsigned char *Tend;
+	ACSM_STATETABLE * StateTable = acsm->acsmStateTable;
+	unsigned char *T;
+	int index;
+	T = Tx;
+	Tend = T + n;
+	for (state = 0; T < Tend; T++)
+	{
+		while ((next = StateTable[state].NextState[*T]) == ACSM_FAIL_STATE)
+		{
+			state = StateTable[state].FailState;
+		}
+		state = StateTable[state].NextState[*T];
+		if (StateTable[state].MatchList != NULL)
+		{
+			for (mlist = StateTable[state].MatchList; mlist != NULL; mlist = mlist->next)
+			{
+				index = T - mlist->n + 1 - Tx + 1;
+				printf("Match Pattern \"%s\" at line %d column %d\n", mlist->patrn, nline, index);
+				nfound++;
+			}
+		}
+	}
+}
+
+
+
+
+/*DFA的搜索过程*/
+void aacSearch(ACSM_STRUCT *acsm, unsigned char *Tx, int n)
+{
+	int state;
+	int nfound = 0;
+	ACSM_PATTERN * mlist;
+	unsigned char *Tend;
+	ACSM_STATETABLE * StateTable = acsm->acsmStateTable;
+	unsigned char *T;
+	int index;
+	T = Tx;
+	Tend = T + n;
+	for (state = 0; T < Tend; T++)
+	{
+		state = StateTable[state].NextState[*T];
+		if (StateTable[state].MatchList != NULL)
+		{
+			for (mlist = StateTable[state].MatchList; mlist != NULL; mlist = mlist->next)
+			{
+				index = T - mlist->n + 1 - Tx + 1;
+				printf("Match Pattern \"%s\" at line %d column %d\n", mlist->patrn, nline, index);
+				nfound++;
+			}
+		}
+	}
+}
+

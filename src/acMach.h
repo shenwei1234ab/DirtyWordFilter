@@ -6,6 +6,9 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
 using namespace std;
 //http://blog.csdn.net/joylnwang/article/details/6793192
 // http://www.hankcs.com/program/algorithm/implementation-and-analysis-of-aho-corasick-algorithm-in-java.html
@@ -43,10 +46,32 @@ public:
 	virtual void Init()
 	{
 		//test
-		Add("he", 2);
-		Add("she", 3);
-		Add("his", 3);
-		Add("hers", 4);
+		FILE *fd = fopen("actext.txt", "r");
+		if (fd == NULL)
+		{
+			fprintf(stderr, "Open file error!\n");
+			exit(1);
+		}
+
+		ifstream myfile("actext.txt");
+		if (!myfile)
+		{
+			printf("open file failed\n");
+		}
+		//读取模式串
+		std::string str;
+		while (getline(myfile, str))
+		{
+			if (str == "")
+			{
+				continue;
+			}
+			Add(str.c_str(), strlen(str.c_str()));
+		}
+		//Add("he", 2);
+		//Add("she", 3);
+		//Add("his", 3);
+		//Add("hers", 4);
 		Compile();
 	}
 
@@ -94,6 +119,7 @@ public:
 	void _Build_NFA()
 	{
 		std::queue<int> stateQueue;
+		acsmStateTable[0].FailState = -1;
 		//设置度为1的节点的失效状态
 		auto hashmap =  acsmStateTable[0].NextState;
 		for (auto it = hashmap.begin(); it != hashmap.end(); ++it){
@@ -154,8 +180,17 @@ public:
 			else
 			{
 				//退回到failed state去找
-				state = acsmStateTable[state].FailState;
-				p--;
+				int failed_state = acsmStateTable[state].FailState;
+				if (failed_state == -1)
+				{
+
+				}
+				else
+				{
+					state = failed_state;
+					p--;
+				}
+				//;
 			}
 		}
 		return ret;

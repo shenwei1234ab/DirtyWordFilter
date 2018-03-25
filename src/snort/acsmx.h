@@ -71,4 +71,11 @@ void acsmFree(ACSM_STRUCT * acsm);
 void PrintMatch(ACSM_PATTERN * pattern, ACSM_PATTERN * mlist, int nline, int index);
 void PrintSummary(ACSM_PATTERN * pattern);
 
+
+
+
+void aacSearch(ACSM_STRUCT *acsm, unsigned char *Tx, int n);
+void acSearch(ACSM_STRUCT *acsm, unsigned char *Tx, int n);
+
+
 #endif
