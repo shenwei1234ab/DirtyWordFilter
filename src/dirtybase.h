@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <string>
 #include <map>
-using namespace std;
+#include "Unicode.h"
 
 class DirtyProcessor
 {
 public:
-	virtual void Add(const char *pArray, size_t size) {};
-	virtual bool Check(const char *p, size_t size) { return false; };
+	virtual void Add(const c32 *pArray, size_t size) {};
+	virtual bool Check(const c32 *p, size_t size) { return false;};
 	virtual void Init(){};
 	virtual ~DirtyProcessor(){};
 };

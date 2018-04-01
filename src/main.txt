@@ -5,7 +5,7 @@
 #include <map>
 #include "acMach.h"
 #include <fstream>
-#include "acsmx.h"
+#include "snort\acsmx.h"
 #include <string>
 #include <type_traits>
 unsigned char text[MAXLEN];
@@ -15,39 +15,17 @@ using namespace std;
 void DirtyTest()
 {
 	//test
-	DiryManger::GetInstance().Init();
-	std::string str = "赛尔号irs";
-	std::cout << "start is "<<str << std::endl;
-	str32 u32_str;
-	Unicode::convert(str.c_str(),str.size(),u32_str);
-//	for(auto it = u32_str.begin();it != u32_str.end();++it)
-//	{
-//		std::cout<< *it<<std::endl;
-//	}
-//	if (DiryManger::GetInstance().Check(u32_str))
-//	{
-//		std::cout << "found" << std::endl;
-//	}
-//	else
-//	{
-//		std::cout << "not found" << std::endl;
-//	}
-	c32 replace = '#';
-//	std::string replace = "#";
-//	std::u32string replace_str;
-//	Unicode::convert(replace.c_str(),replace.size(),replace_str);
-	//void Repalce(const str32 &src,c32 replace,c32 *pout)
-	int length  = u32_str.length();
-	c32 *pout=new c32[length];
-	DiryManger::GetInstance().Replace(u32_str,replace,pout);
-	std::cout<<"after"<<std::endl;
-	for(int i=0;i< length;++i)
+	DiryManger<AcMachine>::GetInstance().Init();
+	std::string str = "赛尔号啊死";
+	std::u32string u32_str = To_UTF32(str);
+	if (DiryManger<AcMachine>::GetInstance().Check(u32_str))
 	{
-		std::cout<< pout[i]<<std::endl;
+		std::cout << "found" << std::endl;
 	}
-	std::string out;
-	Unicode::convert(pout,out);
-	std::cout << "result is "<<out << std::endl;
+	else
+	{
+		std::cout << "not found" << std::endl;
+	}
 }	
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
 int snortTest()
@@ -92,11 +70,16 @@ int snortTest()
 	return (0);
 }
 
-
-int main()
+void test()
 {
-	//test();
+	std::string str = "sss";
+	std::u32string u32_str = To_UTF32(str);
+	int i = 1;
+}
+void main()
+{
+	test();
 	DirtyTest();
 	//snortTest();
-	return 0;
+	getchar();
 }

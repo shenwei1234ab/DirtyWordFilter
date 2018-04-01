@@ -9,16 +9,18 @@
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
+#include "Unicode.h"
 using namespace std;
 //http://blog.csdn.net/joylnwang/article/details/6793192
 // http://www.hankcs.com/program/algorithm/implementation-and-analysis-of-aho-corasick-algorithm-in-java.html
 //https://tech.meituan.com/ac.html
 
 #define ACSM_FAIL_STATE -1
+
 struct acsm_pattern
 {
-	string patrn;			//´óÐ´
-	string casepatrn;		//xiaoÐ´
+	str32 patrn;			//ï¿½ï¿½Ð´
+	str32 casepatrn;		//xiaoÐ´
 	int      n;
 	int      nocase;
 	//void   * id;
@@ -29,7 +31,7 @@ struct acsm_statetable
 {
 	/* Next state - based on input character */
 	//int      NextState[ALPHABET_SIZE];
-	unordered_map<char, int>  NextState;
+	unordered_map<c32, int>  NextState;
 
 	/* Failure state - used while building NFA & DFA  */
 	int      FailState ;
@@ -40,10 +42,13 @@ struct acsm_statetable
 };
 
 
-class AcMachine :public DirtyProcessor
+
+class AcMachine
 {
+private:
+	
 public:
-	virtual void Init()
+	 void Init()
 	{
 		//test
 		FILE *fd = fopen("actext.txt", "r");
@@ -58,7 +63,7 @@ public:
 		{
 			printf("open file failed\n");
 		}
-		//¶ÁÈ¡Ä£Ê½´®
+		//ï¿½ï¿½È¡Ä£Ê½ï¿½ï¿½
 		std::string str;
 		while (getline(myfile, str))
 		{
@@ -66,7 +71,9 @@ public:
 			{
 				continue;
 			}
-			Add(str.c_str(), strlen(str.c_str()));
+			std::u32string u32_str ;
+			Unicode::convert(str.c_str(),str.size(),u32_str);
+			Add(u32_str.c_str(), u32_str.size());
 		}
 		//Add("he", 2);
 		//Add("she", 3);
@@ -75,7 +82,7 @@ public:
 		Compile();
 	}
 
-	virtual void Add(const char *pArray, size_t size)
+	 void Add(const c32 *pArray, size_t size)
 	{
 		acsm_pattern newPattern = acsm_pattern();
 		newPattern.patrn = pArray;
@@ -87,99 +94,31 @@ public:
 	}
 
 
-	//´´½¨goto±íºÍout±í
-	void _AddPatternStates(acsm_pattern  p)
-	{
-		int state = 0, next, n;
-		int index = 0;
-		//ÕÒµ½ÐÂ½ÚµãµÄÎ»ÖÃ
-		for ( ;index < p.patrn.length(); ++index){
-			char str = p.patrn[index];
-			auto it = acsmStateTable[state].NextState.find(str);
-			if (it == acsmStateTable[state].NextState.end()){
-				break;
-			}
-			state = it->second;
-		}
-		for (; index < p.patrn.length(); ++index){
-			char str = p.patrn[index];
-			//²åÈëÐÂµÄ½Úµã
-			acsmNumStates++;
-			acsmStateTable[state].NextState[str] = acsmNumStates;
-			acsmStateTable[acsmNumStates] = acsm_statetable();
-			state = acsmNumStates;
-		}
-		//¹¹½¨³õ²½µÄout±í
-		acsmStateTable[state].MatchList.push_back(p);
-	}
 
 
 
-	//¹¹½¨failed±í:·ÇÈ·¶¨ÓÐÏÞ×Ô¶¯»ú
-	void _Build_NFA()
-	{
-		std::queue<int> stateQueue;
-		acsmStateTable[0].FailState = -1;
-		//ÉèÖÃ¶ÈÎª1µÄ½ÚµãµÄÊ§Ð§×´Ì¬
-		auto hashmap =  acsmStateTable[0].NextState;
-		for (auto it = hashmap.begin(); it != hashmap.end(); ++it){
-			acsmStateTable[it->second].FailState = 0;
-			stateQueue.push(it->second);
-		}
-		
-		while (!stateQueue.empty()){
-			int state = stateQueue.front();
-			stateQueue.pop();
-			//ÏÂÒ»¸ö×´Ì¬
-			auto nextStates = acsmStateTable[state].NextState;
-			for (auto it = nextStates.begin(); it != nextStates.end(); ++it)
-			{
-				char c = it->first;
-				////»ñµÃÉÏÒ»¸ö×´Ì¬µÄfailedÖµ
-				int lastFailed = acsmStateTable[state].FailState;
-				//¼ÆËãÏÂÒ»¸ö×´Ì¬µÄfailedÖµ
-				int nextState = it->second;
-				stateQueue.push(nextState);
-
-				auto iter = acsmStateTable[lastFailed].NextState.find(c);
-				if (iter != acsmStateTable[lastFailed].NextState.end()){
-					acsmStateTable[nextState].FailState = iter->second;
-					//¸üÐÂout±í
-					if (acsmStateTable[iter->second].MatchList.size() >= 1){
-						acsmStateTable[nextState].MatchList.insert(acsmStateTable[nextState].MatchList.end(), acsmStateTable[iter->second].MatchList.begin(), acsmStateTable[iter->second].MatchList.end());
-					}
-				}
-				else{
-					//Ã»ÓÐÕÒµ½failedÎª0
-					acsmStateTable[nextState].FailState = 0;
-				}
-			}
-		}
-	}
-
-
-
-
-	virtual bool Check(const char *p, size_t size) 
+	 bool Check(const c32 *p, size_t size)
 	{
 		bool ret = false;
 		int state = 0;
 		for (; size>=0 && *p; --size, ++p) {
-			char c = *p;
+			c32 c = *p;
 			auto it = acsmStateTable[state].NextState.find(c);
 			if (it != acsmStateTable[state].NextState.end()){
 				state = it->second;
 				if (acsmStateTable[state].MatchList.size() != 0){
 					ret = true;
-					//Æ¥Åäµ½
+					//Æ¥ï¿½äµ½
 					for (auto i = acsmStateTable[state].MatchList.begin(); i != acsmStateTable[state].MatchList.end(); ++i){
-						std::cout << i->patrn.c_str() << std::endl;
+						std::string out;
+						Unicode::convert(i->patrn.c_str(),out);
+						std::cout << out << std::endl;
 					}
 				}
 			}
 			else
 			{
-				//ÍË»Øµ½failed stateÈ¥ÕÒ
+				//ï¿½Ë»Øµï¿½failed stateÈ¥ï¿½ï¿½
 				int failed_state = acsmStateTable[state].FailState;
 				if (failed_state == -1)
 				{
@@ -210,18 +149,128 @@ public:
 			ACSM_STATETABLE state;
 			acsmStateTable.push_back(state);
 		}*/
-		//step1 ´´½¨goto±íºÍ³õ²½µÄout±í
+		//step1 ï¿½ï¿½ï¿½ï¿½gotoï¿½ï¿½Í³ï¿½ï¿½ï¿½ï¿½ï¿½outï¿½ï¿½
 		for (auto iter = acsmPatterns.begin(); iter != acsmPatterns.end(); ++iter)
 		{
 			_AddPatternStates(*iter);
 		}
-		//step2 ´´½¨failed±í
+		//step2 ï¿½ï¿½ï¿½ï¿½failedï¿½ï¿½
 		_Build_NFA();
 	}
 
+
+	void Replace(c32 *p, size_t size,c32 pRelpace)
+	{
+		bool ret = false;
+		int state = 0;
+		for (; size>=0 && *p; --size, ++p) {
+			c32 c = *p;
+			auto it = acsmStateTable[state].NextState.find(c);
+			if (it != acsmStateTable[state].NextState.end()){
+				state = it->second;
+				m_findingChars.push_back(p);
+				if (acsmStateTable[state].MatchList.size() != 0){
+					ret = true;
+					m_foundedChars.splice(m_foundedChars.end(), m_findingChars);
+					m_findingChars.clear();
+				}
+			}
+			else
+			{
+				int failed_state = acsmStateTable[state].FailState;
+				if (failed_state == -1)
+				{
+					m_findingChars.clear();
+				}
+				else
+				{
+					state = failed_state;
+					p--;
+				}
+			}
+		}
+
+		for(auto iter = m_foundedChars.begin();iter != m_foundedChars.end();++iter)
+		{
+			*(*iter) =pRelpace;
+		}
+	}
+
+
 private:
+	void _AddPatternStates(acsm_pattern  p)
+	{
+		int state = 0, next, n;
+		int index = 0;
+		//ï¿½Òµï¿½ï¿½Â½Úµï¿½ï¿½Î»ï¿½ï¿½
+		for ( ;index < p.patrn.length(); ++index){
+			c32 str = p.patrn[index];
+			auto it = acsmStateTable[state].NextState.find(str);
+			if (it == acsmStateTable[state].NextState.end()){
+				break;
+			}
+			state = it->second;
+		}
+		for (; index < p.patrn.length(); ++index){
+			c32 str = p.patrn[index];
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ÂµÄ½Úµï¿½
+			acsmNumStates++;
+			acsmStateTable[state].NextState[str] = acsmNumStates;
+			acsmStateTable[acsmNumStates] = acsm_statetable();
+			state = acsmNumStates;
+		}
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½outï¿½ï¿½
+		acsmStateTable[state].MatchList.push_back(p);
+	}
+
+
+
+	//ï¿½ï¿½ï¿½ï¿½failedï¿½ï¿½:ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½
+	void _Build_NFA()
+	{
+		std::queue<int> stateQueue;
+		acsmStateTable[0].FailState = -1;
+		//ï¿½ï¿½ï¿½Ã¶ï¿½Îª1ï¿½Ä½Úµï¿½ï¿½Ê§Ð§×´Ì¬
+		auto hashmap =  acsmStateTable[0].NextState;
+		for (auto it = hashmap.begin(); it != hashmap.end(); ++it){
+			acsmStateTable[it->second].FailState = 0;
+			stateQueue.push(it->second);
+		}
+
+		while (!stateQueue.empty()){
+			int state = stateQueue.front();
+			stateQueue.pop();
+			//ï¿½ï¿½Ò»ï¿½ï¿½×´Ì¬
+			auto nextStates = acsmStateTable[state].NextState;
+			for (auto it = nextStates.begin(); it != nextStates.end(); ++it)
+			{
+				char c = it->first;
+				////ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½×´Ì¬ï¿½ï¿½failedÖµ
+				int lastFailed = acsmStateTable[state].FailState;
+				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½×´Ì¬ï¿½ï¿½failedÖµ
+				int nextState = it->second;
+				stateQueue.push(nextState);
+
+				auto iter = acsmStateTable[lastFailed].NextState.find(c);
+				if (iter != acsmStateTable[lastFailed].NextState.end()){
+					acsmStateTable[nextState].FailState = iter->second;
+					//ï¿½ï¿½ï¿½ï¿½outï¿½ï¿½
+					if (acsmStateTable[iter->second].MatchList.size() >= 1){
+						acsmStateTable[nextState].MatchList.insert(acsmStateTable[nextState].MatchList.end(), acsmStateTable[iter->second].MatchList.begin(), acsmStateTable[iter->second].MatchList.end());
+					}
+				}
+				else{
+					//Ã»ï¿½ï¿½ï¿½Òµï¿½failedÎª0
+					acsmStateTable[nextState].FailState = 0;
+				}
+			}
+		}
+	}
+
+	std::list<c32*> m_findingChars;
+	std::list<c32*> m_foundedChars;
 	int acsmMaxStates;
-	int acsmNumStates;		//½Úµã×ÜµÄ¸öÊý
+	int acsmNumStates;		//ï¿½Úµï¿½ï¿½ÜµÄ¸ï¿½ï¿½ï¿½
 	list<acsm_pattern> acsmPatterns;
 	unordered_map<int, acsm_statetable> acsmStateTable;		//hash key:state  value
 };
