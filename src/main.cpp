@@ -8,35 +8,37 @@
 #include "acsmx.h"
 #include <string>
 #include <type_traits>
+#include "DirtyManager2.h"
 unsigned char text[MAXLEN];
 extern int nline;
 using namespace std;
 ////////使用自己的ac状态机
 void DirtyTest()
 {
+//utf-8模式
+//1.优点:节省英文存储空间
+//2.缺点:中文可能有多个字符存储，找一个中文字要遍历多个节点，浪费更多的时间
+#ifdef _UTF8
+	DiryManger::GetInstance().Init();
+	string check = "海h浸海呵海";
+	std::cout<<"before"<<check<<std::endl;
+	if(DiryManger::GetInstance().Check(check))
+	{
+		char *pout=new char[check.length()];
+		DiryManger::GetInstance().Replace(check,'h#',pout);
+		//std::cout<<"after pout"<<pout<<std::endl;
+	}else
+	{
+		std::cout<< "dirtyword not found"<<std::endl;
+	}
+#else
 	//test
 	DiryManger::GetInstance().Init();
 	std::string str = "赛尔号irs";
 	std::cout << "start is "<<str << std::endl;
 	str32 u32_str;
 	Unicode::convert(str.c_str(),str.size(),u32_str);
-//	for(auto it = u32_str.begin();it != u32_str.end();++it)
-//	{
-//		std::cout<< *it<<std::endl;
-//	}
-//	if (DiryManger::GetInstance().Check(u32_str))
-//	{
-//		std::cout << "found" << std::endl;
-//	}
-//	else
-//	{
-//		std::cout << "not found" << std::endl;
-//	}
 	c32 replace = '#';
-//	std::string replace = "#";
-//	std::u32string replace_str;
-//	Unicode::convert(replace.c_str(),replace.size(),replace_str);
-	//void Repalce(const str32 &src,c32 replace,c32 *pout)
 	int length  = u32_str.length();
 	c32 *pout=new c32[length];
 	DiryManger::GetInstance().Replace(u32_str,replace,pout);
@@ -48,6 +50,8 @@ void DirtyTest()
 	std::string out;
 	Unicode::convert(pout,out);
 	std::cout << "result is "<<out << std::endl;
+#endif
+
 }	
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
 int snortTest()
@@ -93,10 +97,50 @@ int snortTest()
 }
 
 
+void trietreeTest()
+{
+	//使用trietree树字典树
+	DirtyManager2 manager;
+
+	manager.init();
+	std::string check = "ushers";
+	if(manager.Check(check.c_str()) <= 0 )
+	{
+		std::cout<<"not found or error"<<std::endl;
+	}else
+	{
+		std::cout<<"founded"<<std::endl;
+		c8 *pArray = new c8[6];
+		manager.Replace(pArray);
+		for(int i=0;i<6;++i)
+		{
+			std::cout<< pArray[i]<<std::endl;
+		}
+	}
+}
+
+
+
+void test()
+{
+	string str = "海";
+	char *p=new char[str.size()+1];
+	//std::cout<<"str size="<<str.size()<<std::endl;
+	for(int i=0;i<str.size();++i)
+	{
+		p[i] = str[i];
+		//std::cout<< i<<":"<<str[i]<<std::endl;
+	}
+	p[str.size()] = 'h';
+	std::cout<<p<<std::endl;
+	//str32 u32_str;
+	//Unicode::convert(str.c_str(),str.size(),u32_str);
+
+}
 int main()
 {
-	//test();
 	DirtyTest();
+	//DirtyTest();
 	//snortTest();
 	return 0;
 }
