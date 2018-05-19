@@ -48,15 +48,7 @@ public:
 	void Replace(const str32 &src,c32 replace,c32 *pout)
 #endif
 	{
-		//std::cout<<"before"<<std::endl;
-//		c32 *idx = pout;
-//		for(int i=0;i<src.length();++i)
-//		{
-//			*idx = src.at(i);
-//			std::cout<< *idx << ","<<std::endl;
-//			idx ++;
-//		}
-		m_tree.Replace(src.c_str(), src.length(),replace);
+		m_tree.Replace(src.c_str(), src.length(),replace, pout);
 	}
 
 

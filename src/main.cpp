@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <stdio.h>
 #include <vector>
 #include "DirtyManager.h"
@@ -9,50 +9,73 @@
 #include <string>
 #include <type_traits>
 #include "DirtyManager2.h"
+
 unsigned char text[MAXLEN];
 extern int nline;
 using namespace std;
+
+
 ////////使用自己的ac状态机
 void DirtyTest()
 {
-//utf-8模式
-//1.优点:节省英文存储空间
-//2.缺点:中文可能有多个字符存储，找一个中文字要遍历多个节点，浪费更多的时间
+	//utf-8模式
+	//1.优点:节省英文存储空间
+	//2.缺点:中文可能有多个字符存储，找一个中文字要遍历多个节点，浪费更多的时间
 #ifdef _UTF8
 	DiryManger::GetInstance().Init();
-	string check = "海h浸海呵海";
-	std::cout<<"before"<<check<<std::endl;
-	if(DiryManger::GetInstance().Check(check))
+	string check = "大a海u";
+#ifdef _WIN32
+	//windows需要把gbk转为uf8-8
+	check = Unicode::utf8fromgbk(check);
+	for (int i = 0; i < check.length(); ++i)
 	{
-		char *pout=new char[check.length()];
-		DiryManger::GetInstance().Replace(check,'h#',pout);
-		//std::cout<<"after pout"<<pout<<std::endl;
-	}else
-	{
-		std::cout<< "dirtyword not found"<<std::endl;
+		printf("%x\n", check[i]);
 	}
 #else
-	//test
+	std::cout << "before" << std::endl;
+	for (int i = 0; i<check.size(); ++i)
+	{
+		printf("check %d:%x\n", i, check[i]);
+	}
+#endif	
+	if (DiryManger::GetInstance().Check(check))
+	{
+		char *pout = new char[check.length()];
+		DiryManger::GetInstance().Replace(check, '#', pout);
+		string out = pout;
+		delete[]pout;
+#ifdef _WIN32
+		//转为gbk
+		out = Unicode::gbkfromutf8(out);
+#endif
+		printf("result:%s\n", out.c_str());
+	}
+	else
+	{
+		std::cout << "dirtyword not found" << std::endl;
+	}
+
+#else
+	//utf-32模式
 	DiryManger::GetInstance().Init();
 	std::string str = "赛尔号irs";
-	std::cout << "start is "<<str << std::endl;
+	std::cout << "start is " << str << std::endl;
 	str32 u32_str;
-	Unicode::convert(str.c_str(),str.size(),u32_str);
+	Unicode::convert(str.c_str(), str.size(), u32_str);
 	c32 replace = '#';
-	int length  = u32_str.length();
-	c32 *pout=new c32[length];
-	DiryManger::GetInstance().Replace(u32_str,replace,pout);
-	std::cout<<"after"<<std::endl;
-	for(int i=0;i< length;++i)
+	int length = u32_str.length();
+	c32 *pout = new c32[length];
+	DiryManger::GetInstance().Replace(u32_str, replace, pout);
+	std::cout << "after" << std::endl;
+	for (int i = 0; i< length; ++i)
 	{
-		std::cout<< pout[i]<<std::endl;
+		std::cout << pout[i] << std::endl;
 	}
 	std::string out;
-	Unicode::convert(pout,out);
-	std::cout << "result is "<<out << std::endl;
+	Unicode::convert(pout, out);
+	std::cout << "result is " << out << std::endl;
 #endif
-
-}	
+}
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
 int snortTest()
 {
@@ -101,46 +124,44 @@ void trietreeTest()
 {
 	//使用trietree树字典树
 	DirtyManager2 manager;
-
 	manager.init();
 	std::string check = "ushers";
-	if(manager.Check(check.c_str()) <= 0 )
+	if (manager.Check(check.c_str()) <= 0)
 	{
-		std::cout<<"not found or error"<<std::endl;
-	}else
+		std::cout << "not found or error" << std::endl;
+	}
+	else
 	{
-		std::cout<<"founded"<<std::endl;
+		std::cout << "founded" << std::endl;
 		c8 *pArray = new c8[6];
 		manager.Replace(pArray);
-		for(int i=0;i<6;++i)
+		for (int i = 0; i<6; ++i)
 		{
-			std::cout<< pArray[i]<<std::endl;
+			std::cout << pArray[i] << std::endl;
 		}
 	}
 }
 
-
-
-void test()
+void strTest()
 {
-	string str = "海";
-	char *p=new char[str.size()+1];
-	//std::cout<<"str size="<<str.size()<<std::endl;
-	for(int i=0;i<str.size();++i)
-	{
-		p[i] = str[i];
-		//std::cout<< i<<":"<<str[i]<<std::endl;
-	}
-	p[str.size()] = 'h';
-	std::cout<<p<<std::endl;
-	//str32 u32_str;
-	//Unicode::convert(str.c_str(),str.size(),u32_str);
-
+	char *p = new char[10];
+	p[0] = 'a';
+	p[1] = 'b';
+	p[2] = '\0';
+	std::string out = p;
+	std::cout << out << std::endl;
+	printf("%s\n", out.c_str());
+	std::cout << p << std::endl;
+	printf("%s", p);
 }
+
+
 int main()
 {
+	//strTest();
 	DirtyTest();
 	//DirtyTest();
 	//snortTest();
+	getchar();
 	return 0;
 }

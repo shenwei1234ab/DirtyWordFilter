@@ -72,13 +72,18 @@ public:
 		{
 			printf("open file failed\n");
 		}
-		//��ȡģʽ��
 		std::string str;
 		while (getline(myfile, str))
 		{
 			if (str == "")
 			{
 				continue;
+			}
+			//todo utf8-gbk
+			std::cout << str<<":" << std::endl;
+			for (int i = 0; i < str.length(); ++i)
+			{
+				printf("%d:%x\n",i, str[i]);
 			}
 #ifdef _UTF8
 		Add(str.c_str(), strlen(str.c_str()));
@@ -181,11 +186,11 @@ public:
 	}
 
 #ifdef _UTF8
-	void Replace(const char *p, size_t size,char pReplace)
+	void Replace(const char *p, size_t size,char pReplace, char *pout)
 	{
 		m_findingChars.clear();
 		//m_foun
-		char *pout = new char[size];
+		//pout = new char[size];
 		int state = 0;
 		int idx = 0 ;
 		for (; size>=0 && *p; --size, ++p) {
@@ -226,7 +231,6 @@ public:
 			}
 		}
 		pout[idx]='\0';
-		std::cout<<"after replace"<<std::endl<<pout<<std::endl;
 	}
 #else
 	void Replace(c32 *p, size_t size,c32 pRelpace)
