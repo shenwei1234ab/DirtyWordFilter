@@ -12,13 +12,11 @@ class DiryManger
 private:
 	DiryManger()   
 	{
-		//m_tree = new T();
+		
 	}
-	DiryManger(const DiryManger &);
-	DiryManger & operator = (const DiryManger &);
 	~DiryManger()
 	{
-		//delete (m_tree);
+		
 	}
 public:
 	static DiryManger & GetInstance()
@@ -29,26 +27,23 @@ public:
 
 	bool Init()
 	{
-		m_tree.Init();
+		m_tree.Init("actext.txt");
 		return true;
 	}
-#ifdef _UTF8
-	bool Check(const string &str)
-#else
+
 	bool Check(const str32 &str)
-#endif
 	{
 		return m_tree.Check(str.c_str(), str.length());
 	}
 
 
-#ifdef _UTF8
-	void Replace(const string &src,char replace,char *pout)
-#else
-	void Replace(const str32 &src,c32 replace,c32 *pout)
-#endif
+
+	bool Replace(str32 &src,c32 replace)
 	{
-		m_tree.Replace(src.c_str(), src.length(),replace, pout);
+		//int size = src.length();
+		//memcpy(pout, src.c_str(), size+1);
+		return m_tree.Replace(const_cast<c32*>(src.c_str()), src.length(), replace);
+		//m_tree.Replace(pout, size, replace);
 	}
 
 

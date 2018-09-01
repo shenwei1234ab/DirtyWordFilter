@@ -4,7 +4,7 @@
  *  Created on: 2015年8月24日
  *      Author: shenwei
  */
-
+#define _CRT_SECURE_NO_WARNINGS
 #ifndef SRC_SERVER_MANAGER_DIRTYMANGER2_H_
 #define SRC_SERVER_MANAGER_DIRTYMANGER2_H_
 

@@ -1,5 +1,5 @@
 #include "Unicode.h"
-
+#include <codecvt>
 
 ssize_t Unicode::convert(const c8 *src, size_t src_len, c32 *dest) {
 	c32 chr = 0;
@@ -100,6 +100,22 @@ ssize_t Unicode::convert(const c8 *src, size_t src_len, c32 *dest, size_t dest_l
 	}
 	return (ssize_t)(dest - ptr);
 }
+
+
+
+//c++11 vs2013&&linux  vs2015Á¬½Ó´íÎó
+//std::u32string Unicode::convert(const u8string &s,str32 &dest)
+//{
+//	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+//
+//	/*auto p = reinterpret_cast<const char *>(s.data());
+//	auto str = conv.from_bytes(p, p + s.size());
+//	std::u32string u32_str(str.begin(), str.end());
+//	return u32_str;*/
+//
+//	return conv.from_bytes(s);
+//}
+
 
 ssize_t Unicode::convert(const c8 *src, size_t src_len, str32 &dest) {
 	c32 chr = 0;
