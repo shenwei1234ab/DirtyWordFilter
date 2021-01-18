@@ -27,8 +27,7 @@ public:
 
 	bool Init()
 	{
-		m_tree.Init("actext.txt");
-		return true;
+		return m_tree.LoadFromFile("actext.txt");
 	}
 
 	bool Check(const str32 &str)

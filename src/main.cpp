@@ -23,18 +23,20 @@ using namespace std;
 void DirtyTest()
 {
 	//utf-32模式
-	DiryManger::GetInstance().Init();
-	std::string str = "海gk我是ushers";
-	std::cout << "start--------------------------" << std::endl<< str << std::endl;
+	if (!DiryManger::GetInstance().Init())
+	{
+		std::cout << "init failed" << std::endl;
+	}
+	std::string str = "swsww海傻逼wwwss";
 	str32 u32_str;
 	Unicode::convert(str.c_str(), str.size(), u32_str);
 	c32 replace = '#';
-	//int length = u32_str.length();
-	//c32 *pout = new c32[length];
-	//if (DiryManger::GetInstance().Check(u32_str))
-	//{
-	//	
-	//}
+	int length = u32_str.length();
+	c32 *pout = new c32[length];
+	if (DiryManger::GetInstance().Check(u32_str))
+	{
+		
+	}
 	if (!DiryManger::GetInstance().Replace(u32_str, replace))
 	{
 		return;
