@@ -7,16 +7,18 @@
 #include "dirtybase.h"
 #include "acMach.h"
 //template <class T>
+
+class DirtyProcessor;
 class DiryManger
 {
 private:
-	DiryManger()   
+	DiryManger()
 	{
-		
+
 	}
 	~DiryManger()
 	{
-		
+
 	}
 public:
 	static DiryManger & GetInstance()
@@ -25,30 +27,15 @@ public:
 		return instance;
 	}
 
-	bool Init()
-	{
-		return m_tree.LoadFromFile("actext.txt");
-	}
+	bool Init(DirtyProcessor *pProcess);
 
-	bool Check(const str32 &str)
-	{
-		return m_tree.Check(str.c_str(), str.length());
-	}
+	bool Check(const c32 *pSource, size_t size, std::list<str32> &outMatchingList);
 
-
-
-	bool Replace(str32 &src,c32 replace)
-	{
-		//int size = src.length();
-		//memcpy(pout, src.c_str(), size+1);
-		return m_tree.Replace(const_cast<c32*>(src.c_str()), src.length(), replace);
-		//m_tree.Replace(pout, size, replace);
-	}
-
+	bool Replace(c32 *pStr, size_t size, const c32  &replaceChar);
 
 private:
-	//DirtyProcessor *m_tree;
-	AcMachine m_tree;
+	DirtyProcessor * m_pProcess = nullptr;
+	//AcMachine m_tree;
 };
 
 #endif

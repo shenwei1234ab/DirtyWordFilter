@@ -3,17 +3,19 @@
 
 #include <iostream>
 #include <stdio.h>
-#include <string>
+#include <list>
 #include <map>
 #include "Unicode.h"
 
 class DirtyProcessor
 {
 public:
-	virtual void Add(const c32 *pArray, size_t size) {};
-	virtual bool Check(const c32 *p, size_t size) { return false;};
-	virtual void Init(){};
+	virtual bool Check(const c32 *p, size_t size, std::list<str32> &outMatchingList) = 0;
+	virtual bool Init ()=  0;
 	virtual ~DirtyProcessor(){};
+	virtual bool Replace(c32 *pStr, size_t size, const c32  &replaceChar) = 0;
+	virtual int32_t GetNodeCount() { return 0; }
+	virtual int32_t GetPatternCount() { return 0; }
 };
 
 

@@ -8,9 +8,9 @@
 #include "acsmx.h"
 #include <string>
 #include <locale>
-//#include <type_traits>
 #include <codecvt>
-#include "DirtyManager2.h"
+#include <functional>
+#include "trieTree.h"
 #ifdef _WIN32
 #pragma execution_character_set("utf-8")	
 #endif
@@ -20,39 +20,105 @@ using namespace std;
 
 
 ////////使用自己的ac状态机
+uint64_t GetTickMs()
+{
+#ifdef _MSC_VER
+	return GetTickCount64();
+
+#else
+	timeval curTime;
+	gettimeofday(&curTime, NULL);
+	return  (curTime.tv_sec) * 1000 + (curTime.tv_usec) / 1000;
+#endif
+}
+
+uint64_t CostAvgTimeTest(int nTimes)
+{
+	//std::string str = "usherssssssssushers电话交友售手枪电话交友售手枪ssssss";
+	//std::cout << "input string is:" << str << std::endl;
+	//str32 u32_str;
+	//Unicode::convert(str.c_str(), str.size(), u32_str);
+	std::u32string context;
+	//读取一片文章
+	ifstream myfile("actext.txt");
+	std::string str;
+	if (!myfile.is_open())
+	{
+		printf("from file  failed \n");
+		return false;
+	}
+	while (!myfile.eof())
+	{
+		getline(myfile, str);
+		if (str == "")
+		{
+			continue;
+		}
+		//todo utf8-gbk
+		std::u32string u32_str;
+		Unicode::convert(str.c_str(), str.size(), u32_str);
+		context += u32_str;
+	}
+
+
+
+
+	c32 replace = '#';
+	int length = context.length();
+	c32 *pout = new c32[length];
+	std::list<str32> matchingList;
+
+
+	//测试nTimes次计算平均时间
+	uint64_t totalTime = 0;
+	for (int times = 0; times <= nTimes; ++times)
+	{
+		std::u32string testContext = context;
+		uint64_t startTime = GetTickCount();
+		if (DiryManger::GetInstance().Check(testContext.c_str(), length, matchingList) && matchingList.size() > 0)
+		{
+			for (auto iter = matchingList.begin(); iter != matchingList.end(); ++iter)
+			{
+				std::string matchingStr;
+				Unicode::convert(iter->c_str(), matchingStr);
+				//std::cout << "matchStr:" << matchingStr << std::endl;
+			}
+		}
+		DiryManger::GetInstance().Replace(const_cast<c32 *>(testContext.c_str()), length, replace);
+		std::string out;
+		Unicode::convert(testContext, out);
+		//std::cout << "-------------------------after replace:" << out << std::endl;
+
+
+		uint64_t endTime = GetTickCount();
+		totalTime += endTime - startTime;
+	}
+	return totalTime / nTimes;
+}
+
+
 void DirtyTest()
 {
-	//utf-32模式
-	if (!DiryManger::GetInstance().Init())
+	//字典树
+	DirtyProcessor *pProcess = new TrieTree();
+	//if (!DiryManger::GetInstance().Init(pProcess))
+	//{
+	//	std::cout << "init trietree failed" << std::endl;
+	//}
+	//uint64_t time1 = CostAvgTimeTest(800);
+	//std::cout << "------------------------trietree costTime:" << time1 << std::endl;
+
+	//ac状态机
+	pProcess = new AcMachine();
+	if (!DiryManger::GetInstance().Init(pProcess))
 	{
-		std::cout << "init failed" << std::endl;
+		std::cout << "init acmachine failed" << std::endl;
 	}
-	std::string str = "swsww海傻逼wwwss";
-	str32 u32_str;
-	Unicode::convert(str.c_str(), str.size(), u32_str);
-	c32 replace = '#';
-	int length = u32_str.length();
-	c32 *pout = new c32[length];
-	if (DiryManger::GetInstance().Check(u32_str))
-	{
-		
-	}
-	if (!DiryManger::GetInstance().Replace(u32_str, replace))
-	{
-		return;
-	}
-	
-	std::cout << "after--------------------------" << std::endl;
-	/*for (int i = 0; i< length; ++i)
-	{
-		std::cout << pout[i] << std::endl;
-	}*/
-	std::string out;
-	//Unicode::convert(pout, out);
-	Unicode::convert(u32_str, out);
-	std::cout << out << std::endl;
+	uint64_t time2 = CostAvgTimeTest(1);
+	std::cout << "------------------------acmachine costTime:" << time2 << std::endl;
 }
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
+#if 0
 int snortTest()
 {
 	int i, nocase = 0;
@@ -94,74 +160,13 @@ int snortTest()
 	printf("\n### AC Match Finished ###\n");
 	return (0);
 }
+#endif
 
-//
-//void trietreeTest()
-//{
-//	//使用trietree树字典树
-//	DirtyManager2 manager;
-//	manager.init();
-//	std::string check = "ushers";
-//	if (manager.Check(check.c_str()) <= 0)
-//	{
-//		std::cout << "not found or error" << std::endl;
-//	}
-//	else
-//	{
-//		std::cout << "founded" << std::endl;
-//		c8 *pArray = new c8[6];
-//		manager.Replace(pArray);
-//		for (int i = 0; i<6; ++i)
-//		{
-//			std::cout << pArray[i] << std::endl;
-//		}
-//	}
-//}
 
-//http://www.baidu.com/link?url=5P7Y0xq9wTxhJM_W_5WPbf3y1pY_CySfncU-9G_OWX0F5Xf_SWu2DO7yfBWEG2n6jSSGA7ZUQ9r6n7YaKwPIKqrBq42V4JRjGJmtTjQqPlXYClcPE4BMA0VpV-U68Kqr
-//
-//std::u32string To_UTF32(const u8string &s)
-//{
-//	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-//
-//	/*auto p = reinterpret_cast<const char *>(s.data());
-//	auto str = conv.from_bytes(p, p + s.size());
-//	std::u32string u32_str(str.begin(), str.end());
-//	return u32_str;*/
-//
-//	return conv.from_bytes(s);
-//}
-
-void strTest()
-{
-	std::string str = "海aaaa";
-	/*for (int i = 0; i < str.size(); ++i)
-	{
-		printf("%x: %d\n", str[i],sizeof(str[i]));
-	}*/
-	str32 u32_str;
-	int length = Unicode::convert(str.c_str(), str.size(), u32_str);
-	for (int i = 0; i <u32_str.size(); ++i)
-	{
-		printf("%x\n", u32_str[i]);
-	}
-
-	/*int size = u32_str.length();
-	c32 *p = new c32[size];
-	memcpy(p, u32_str.c_str(), size * sizeof(c32));
-	for (int i = 0; i < size; ++i)
-	{
-		printf("%x\n", p[i]);
-	}*/
-	getchar();
-}
 
 int main()
 {
-	//strTest();
 	DirtyTest();
-	//DirtyTest();
-	//snortTest();
 	getchar();
 	return 0;
 }
