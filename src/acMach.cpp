@@ -120,13 +120,16 @@ bool AcMachine::Check(const c32 *pStr, size_t size, std::list<str32> &outMatchin
 		}
 		else
 		{
+			//若没找到,就继续跳fail,直到跳到root都没有
 			NODE_STATE failed_state = m_acsmStateTable[state].m_failState;
+			//跳到了根节点都没有,failed跳回根节点(todo能否)
 			if (failed_state == -1)
 			{
-
+				continue;
 			}
 			else
 			{
+
 				state = failed_state;
 				pStr--;
 			}
@@ -323,24 +326,45 @@ void AcMachine::_Build_NFA()
 			//下一个节点
 			NODE_STATE nextState = it->second.m_stateId;
 			stateQueue.push(nextState);
-			//根据当前state计算下一个state的failed值
-			auto iter = m_acsmStateTable[nowFailState].m_nextState.find(c);
-			if (iter != m_acsmStateTable[nowFailState].m_nextState.end())
+			//跳fail,直到跳到根节点或者找到
+			while (m_acsmStateTable[nowFailState].m_nextState.find(c) == m_acsmStateTable[nowFailState].m_nextState.end() && -1 != nowFailState)
 			{
-				//nextState值=nowNode的failed值通过c可以到达的state 
-				NODE_STATE failedState = iter->second.m_stateId;
-				m_acsmStateTable[nextState].m_failState = failedState;
-				//调整out输出因为这个包含了failed状态的输出
-				if (m_acsmStateTable[failedState].m_matchList.size() >= 1)
+				nowFailState = m_acsmStateTable[nowFailState].m_failState;
+			}
+			//找到
+			if (nowFailState != -1)
+			{
+				NODE_STATE newFailStatus =  m_acsmStateTable[nowFailState].m_nextState[c].m_stateId;
+				m_acsmStateTable[nextState].m_failState = newFailStatus;
+				if (m_acsmStateTable[newFailStatus].m_matchList.size() >= 1)
 				{
-					m_acsmStateTable[nextState].m_matchList.insert(m_acsmStateTable[nextState].m_matchList.end(), m_acsmStateTable[failedState].m_matchList.begin(), m_acsmStateTable[failedState].m_matchList.end());
+					m_acsmStateTable[nextState].m_matchList.insert(m_acsmStateTable[nextState].m_matchList.end(), m_acsmStateTable[newFailStatus].m_matchList.begin(), m_acsmStateTable[newFailStatus].m_matchList.end());
 				}
 			}
+			//没有找到指向根节点
 			else
 			{
-				//nowNode无法通过m_failState到达nextState设置失效值为0,也就是从state0开始
-				m_acsmStateTable[nextState].m_failState= 0;
+				m_acsmStateTable[nextState].m_failState = 0;
 			}
+			////根据当前state计算下一个state的failed值
+			//auto iter = m_acsmStateTable[nowFailState].m_nextState.find(c);
+			//if (iter != m_acsmStateTable[nowFailState].m_nextState.end())
+			//{
+			//	//nextState值=nowNode的failed值通过c可以到达的state 
+			//	NODE_STATE failedState = iter->second.m_stateId;
+			//	m_acsmStateTable[nextState].m_failState = failedState;
+			//	//调整out输出因为这个包含了failed状态的输出
+			//	if (m_acsmStateTable[failedState].m_matchList.size() >= 1)
+			//	{
+			//		m_acsmStateTable[nextState].m_matchList.insert(m_acsmStateTable[nextState].m_matchList.end(), m_acsmStateTable[failedState].m_matchList.begin(), m_acsmStateTable[failedState].m_matchList.end());
+			//	}
+			//}
+			//else
+			//{
+			//	//nowNode无法通过m_failState到达nextState设置失效值为0,也就是从state0开始,
+			//	//bug,直到跳到root还没有,而不是直接指向root,https://www.bilibili.com/video/BV1Nk4y1B7SL
+			//	m_acsmStateTable[nextState].m_failState= 0;
+			//}
 		}
 	}
 }

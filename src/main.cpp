@@ -118,7 +118,6 @@ void DirtyTest()
 	std::cout << "------------------------acmachine costTime:" << time2 << std::endl;
 }
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
-#if 0
 int snortTest()
 {
 	int i, nocase = 0;
@@ -126,16 +125,7 @@ int snortTest()
 	char filename[20];
 	ACSM_STRUCT * acsm;
 	acsm = acsmNew();
-	//strcpy(filename, argv[1]);
-	fd = fopen("actext.txt", "r");
-	if (fd == NULL)
-	{
-		fprintf(stderr, "Open file error!\n");
-		exit(1);
-	}
-	nocase = 1;
-
-	ifstream myfile("actext.txt");
+	ifstream myfile("dirtywords2.txt");
 	if (!myfile)
 	{
 		printf("open file failed\n");
@@ -160,7 +150,6 @@ int snortTest()
 	printf("\n### AC Match Finished ###\n");
 	return (0);
 }
-#endif
 
 
 
