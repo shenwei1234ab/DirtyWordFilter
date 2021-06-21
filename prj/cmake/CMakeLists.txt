@@ -1,0 +1,31 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(WordsFilter)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR}/../../src/)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR}/../../src/snort/)
+
+#set(CMAKE_C_COMPILER "/usr/bin/gcc")
+#set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+
+#c++11
+FILE(GLOB_RECURSE SRC ${CMAKE_CURRENT_LIST_DIR}/../../src/*.cpp )
+
+
+
+#编译选项(输出动态库)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -gdwarf-2 -pg  -fPIC")
+#生成动态库
+
+
+#添加头文件目录
+#INCLUDE_DIRECTORIES(../../src/)
+#编译选项(动态载入动态库,libevent)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -gdwarf-2 -pg -Wall  -rdynamic -ldl  -std=c++11")
+
+
+ADD_EXECUTABLE(WordsFilter.exe ${SRC})
+
+
+
+#生成可执行文件
+#TARGET_LINK_LIBRARIES(WordsFilter)
+

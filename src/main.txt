@@ -1,0 +1,85 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include "DirtyManager.h"
+#include <map>
+#include "acMach.h"
+#include <fstream>
+#include "snort\acsmx.h"
+#include <string>
+#include <type_traits>
+unsigned char text[MAXLEN];
+extern int nline;
+using namespace std;
+////////使用自己的ac状态机
+void DirtyTest()
+{
+	//test
+	DiryManger<AcMachine>::GetInstance().Init();
+	std::string str = "赛尔号啊死";
+	std::u32string u32_str = To_UTF32(str);
+	if (DiryManger<AcMachine>::GetInstance().Check(u32_str))
+	{
+		std::cout << "found" << std::endl;
+	}
+	else
+	{
+		std::cout << "not found" << std::endl;
+	}
+}	
+////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
+int snortTest()
+{
+	int i, nocase = 0;
+	FILE *fd;
+	char filename[20];
+	ACSM_STRUCT * acsm;
+	acsm = acsmNew();
+	//strcpy(filename, argv[1]);
+	fd = fopen("actext.txt", "r");
+	if (fd == NULL)
+	{
+		fprintf(stderr, "Open file error!\n");
+		exit(1);
+	}
+	nocase = 1;
+
+	ifstream myfile("actext.txt");
+	if (!myfile)
+	{
+		printf("open file failed\n");
+	}
+	//读取模式串
+	std::string str;
+	while (getline(myfile, str))
+	{
+		acsmAddPattern(acsm, (unsigned char *)str.c_str(), strlen((char *)str.c_str()), nocase);
+	}
+	/* Generate GtoTo Table and Fail Table */
+	acsmCompile(acsm);
+	/*要搜寻的文本串*/
+	std::string text = "ushers";
+	text = "我";
+	acsmSearch(acsm, (unsigned char *)text.c_str(), text.length(), PrintMatch);
+
+	PrintSummary(acsm->acsmPatterns);
+
+	//acsmFree(acsm);
+
+	printf("\n### AC Match Finished ###\n");
+	return (0);
+}
+
+void test()
+{
+	std::string str = "sss";
+	std::u32string u32_str = To_UTF32(str);
+	int i = 1;
+}
+void main()
+{
+	test();
+	DirtyTest();
+	//snortTest();
+	getchar();
+}
