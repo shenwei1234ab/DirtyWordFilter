@@ -1,1 +1,0 @@
-/usr/bin/g++    -O0 -g -gdwarf-2 -pg  -fPIC -O0 -g -gdwarf-2 -pg  -rdynamic -ldl -lpthread -levent -lcrypt -std=c++11 -g    CMakeFiles/WordsFilter.exe.dir/home/leave/WordsFilter/src/main.cpp.o CMakeFiles/WordsFilter.exe.dir/home/leave/WordsFilter/src/Unicode.cpp.o CMakeFiles/WordsFilter.exe.dir/home/leave/WordsFilter/src/snort/acsmx.cpp.o  -o WordsFilter.exe -rdynamic 

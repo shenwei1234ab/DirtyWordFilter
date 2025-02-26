@@ -158,48 +158,6 @@ void AcMachine::Compile()
 bool AcMachine::Replace(c32 *pStr, size_t size, const c32  &replaceChar)
 {
 	m_replaceChars.clear();
-	//for (; size>=0 && *p; --size, ++p) 
-	//{
-	//	c32 c = *p;
-	//	auto it = m_acsmStateTable[state].NextState.find(c);
-	//	if (it != m_acsmStateTable[state].NextState.end())
-	//	{
-	//		state = it->second;
-	//		m_findingChars.push_back(p);
-	//		if (m_acsmStateTable[state].MatchList.size() != 0)
-	//		{
-	//			//ret = true;
-	//			m_foundedChars.splice(m_foundedChars.end(), m_findingChars);
-	//			m_findingChars.clear();
-	//		}
-	//	}
-	//	else
-	//	{
-	//		int failed_state = m_acsmStateTable[state].FailState;
-	//		//
-	//		if (failed_state == -1)
-	//		{
-	//			m_findingChars.clear();
-	//		}
-	//		//failed_state == 0
-	//		else if (failed_state == 0)
-	//		{
-	//			state = failed_state;
-
-	//		}
-	//		else 
-	//		{
-	//			//
-	//			state = failed_state;
-	//			p--;
-	//		}
-	//	}
-	//}
-
-	//for(auto iter = m_foundedChars.begin();iter != m_foundedChars.end();++iter)
-	//{
-	//	*(*iter) =pRelpace;
-	//}
 	bool ret = false;
 	for (NODE_STATE state = 0; size > 0 && *pStr; --size, ++pStr)
 	{

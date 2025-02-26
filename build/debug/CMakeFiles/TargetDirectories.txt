@@ -1,1 +1,0 @@
-/home/leave/WordsFilter/build/debug/CMakeFiles/WordsFilter.exe.dir

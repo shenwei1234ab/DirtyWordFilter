@@ -11,6 +11,7 @@
 #include <codecvt>
 #include <functional>
 #include "trieTree.h"
+#include "acTrie.h"
 #ifdef _WIN32
 #pragma execution_character_set("utf-8")	
 #endif
@@ -71,7 +72,7 @@ uint64_t CostAvgTimeTest(int nTimes)
 
 	//测试nTimes次计算平均时间
 	uint64_t totalTime = 0;
-	for (int times = 0; times <= nTimes; ++times)
+	for (int times = 0; times < nTimes; ++times)
 	{
 		std::u32string testContext = context;
 		uint64_t startTime = GetTickCount();
@@ -81,10 +82,10 @@ uint64_t CostAvgTimeTest(int nTimes)
 			{
 				std::string matchingStr;
 				Unicode::convert(iter->c_str(), matchingStr);
-				//std::cout << "matchStr:" << matchingStr << std::endl;
+				std::cout << "find dirty word:" << matchingStr << std::endl;
 			}
 		}
-		DiryManger::GetInstance().Replace(const_cast<c32 *>(testContext.c_str()), length, replace);
+		//DiryManger::GetInstance().Replace(const_cast<c32 *>(testContext.c_str()), length, replace);
 		std::string out;
 		Unicode::convert(testContext, out);
 		//std::cout << "-------------------------after replace:" << out << std::endl;
@@ -99,23 +100,40 @@ uint64_t CostAvgTimeTest(int nTimes)
 
 void DirtyTest()
 {
-	//字典树
-	DirtyProcessor *pProcess = new TrieTree();
+	////字典树
+	//DirtyProcessor *pProcess = new TrieTree();
 	//if (!DiryManger::GetInstance().Init(pProcess))
 	//{
 	//	std::cout << "init trietree failed" << std::endl;
 	//}
-	//uint64_t time1 = CostAvgTimeTest(800);
+	//uint64_t time1 = CostAvgTimeTest(500);
 	//std::cout << "------------------------trietree costTime:" << time1 << std::endl;
 
-	//ac状态机
-	pProcess = new AcMachine();
+	//ac状态机实现
+	DirtyProcessor  *pProcess = new AcMachine();
 	if (!DiryManger::GetInstance().Init(pProcess))
 	{
 		std::cout << "init acmachine failed" << std::endl;
 	}
-	uint64_t time2 = CostAvgTimeTest(1);
-	std::cout << "------------------------acmachine costTime:" << time2 << std::endl;
+
+	//待过滤的字
+	std::string str = "ushers";
+	std::u32string context;
+	std::u32string u32_str;
+	Unicode::convert(str.c_str(), str.size(), u32_str);
+	context += u32_str;
+	int length = context.length();
+	std::list<str32> matchingList;
+	if (DiryManger::GetInstance().Check(context.c_str(), length, matchingList) && matchingList.size() > 0)
+	{
+		for (auto iter = matchingList.begin(); iter != matchingList.end(); ++iter)
+		{
+			std::string matchingStr;
+			Unicode::convert(iter->c_str(), matchingStr);
+			std::cout << "find dirty word:" << matchingStr << std::endl;
+		}
+	}
+
 }
 ////////使用snort的ac实现。缺点:使用数组存,浪费空间。只能存英文的模式串,中文怎么实现
 int snortTest()
@@ -155,6 +173,7 @@ int snortTest()
 
 int main()
 {
+	//DirtyTest();
 	DirtyTest();
 	getchar();
 	return 0;
